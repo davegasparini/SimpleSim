@@ -1,0 +1,124 @@
+
+
+// user information needed to initiate a trade.
+
+emit -> 'buy event' -> send variables for:
+	-. 	user ID
+	-.	team ID
+	-. 	seller ID
+	-. 	product
+	-. 	purchasePrice
+	-. 	amount
+
+	
+	
+// server responds to 'buy event'
+
+	-.	
+	
+	-.	check if the price and amount are acceptable.
+		
+	-.	check if user has enough funds
+	
+	-.	subtract funds from user's overall account limit.
+	-.	add the product to the user's portfolio:
+			-	product purchased
+			-	amount
+			-	price at purchase
+			-	other optional product attributes
+			
+	
+	
+	
+	
+// collections
+
+	-	users
+			(userName, password, alias, team, portfolio, tradeHistory, )
+	-	teams
+			(teamName, teamMembers, portfolio)
+	-	clients*
+			(clientName, behavior attributes?)
+	-	dealers*
+			(dealerName, behavior attributes?)
+	-	products*
+			(code, productName, associatedMarket)
+	-	eventScript
+			(timeOfOccurance, 
+			 eventTypes[], 
+			 marketUpdate { productCode: String, marketPrice: Number }, 
+			 news { headline: String, article:String }
+	
+	
+	
+//	nested collections
+
+	-	tradeHistory
+	
+	-	portfolio
+			(product, amount, purchasePrice, timeOfPurchase, )
+
+	
+
+// Redundant Data Spots (Double Updates Required)
+
+	- users.team, teams.teamMembers
+
+
+
+
+
+
+
+// mongo commands sticky**
+
+// add new field to every item in collection.
+db.eventScript.update({}, 
+				{$set : { marketUpdate : [
+															 {
+															 	productCode: "MSFT",
+																amount : 10,
+																purchasePrice: -12.50,
+																timeOfPurchase: 5
+															 }
+															]
+								}		
+				},
+				{upsert:false,
+				 multi:true}
+				 );
+
+
+
+// remove field from every item in collection.
+db.users.update({},
+				{$unset: {portfolio:1}},
+				false,true);
+
+
+// access user's portfolio
+db.users.findOne({username:"admin"}, 'portfolio').portfolio[0]
+
+// add new collection.
+db.createCollection("clients");
+
+
+
+// import from csv
+mongoimport -d simDB -c clients --type csv --file clients.csv --headerline
+
+
+// new eventScript sample entry?
+
+{
+    toc: 1,
+    event: ['MarketUpdate', 'News'],
+    marketUpdate: [{
+                    productCode: 'GOOG',
+                    marketPrice: 28.56
+                   }],
+    news: [{
+            headline: 'Good News For People Who Like Bad News',
+            article: 'Earlier today, at approx...'
+           }]
+}

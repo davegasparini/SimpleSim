@@ -1,0 +1,94 @@
+#usernameDisplay {
+	width:200px;
+	height:20px;
+}
+
+#news {
+	width:300px;
+	height:60px;
+}
+
+.product {
+	float: left;
+	width:100px;
+	height:20px;
+	margin:10px;
+	border-style: solid;
+    border-width: 1px;
+    padding: 5px;
+    text-align: center;
+}
+
+.standard {
+	float: left;
+	margin:10px;
+	border-style: solid;
+    border-width: 1px;
+    padding: 5px;
+    font-size: 90%;
+}
+
+#eventScriptDisplay {
+	width:200px;
+	height:60px;
+}
+
+#adminButtons {
+	width:530px;
+	height:25px;
+	text-align: center;
+}
+
+#login {
+	width:200px;
+	height:125px;
+}
+
+#connectedUsers {
+	width:300px;
+	height:20px;
+}
+
+#marketPriceUpdates {
+	width:250px;
+	height:155px;
+}
+
+#portfolio {
+	width:426px;
+	height:160px;
+}
+
+#portProduct1 {
+	float: left;
+}
+
+.portfolioStandard {
+	float:left;
+	height: 18px;
+	padding: 5px;
+	width: 120px;
+	margin: 5px;
+	border-style: solid;
+    border-width: 1px;
+    text-align: center;
+    font-size: 90%;
+}
+
+#pp1Code {
+}
+
+#pp1Amount {
+}
+
+#pp1PurchasePrice {
+}
+
+
+
+
+
+
+
+
+

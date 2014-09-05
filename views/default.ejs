@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/default.css" />
+  <title>woo!</title>
+</head>
+<body>
+
+<div id="usernameDisplay" class="standard">
+  <div id="userNameDisplayText">login status: not logged in</div>
+</div>
+
+<div id="connectedUsers" class="standard">online : </div>
+
+<div id="login" class="standard">
+  <div id="username">username: 
+    <input type="text" name="username" id="usernameInputText"></div>    
+  <div id="password">password: 
+    <input type="password" name="password" id="passwordInputText"></div>
+  <div id="submit">
+    <input type="button" value="login" onclick="login();"></div>
+</div>
+
+<div id="eventScriptDisplay" class="standard">
+  <div id="timer">Seconds To Play : </div>
+  <div id="gameState"></div>
+  <div id="elapsedTime">Elapsed Time (in seconds) :  </div>
+</div>
+
+<div id="news" class="standard">
+ <div id="newsHeadline">Headline :  </div>
+ <div id="newsArticle">Article :  </div>
+</div>
+
+<div id="adminButtons" class="standard">
+  <button type="btnStart" onclick="startTime()">Start</button> 
+  <button type="btnPause" onclick="pauseTime()">Pause</button> 
+  <button type="btnReset" onclick="resetTime()">Reset</button> 
+</div>
+
+<div id="marketPriceUpdates" class="standard">
+ <div id="product1" class="product">GOOG: </div>
+ <button type="btnBuy" onclick="purchase('GOOG')">Buy Google</button>
+ <div id="product2" class="product">MSFT: </div>
+ <div id="product3" class="product">CAT: </div>
+</div>
+
+<div id="portfolio" class="standard">
+  <div id="portProduct">
+   <div id="ppCode" class="portfolioStandard">Product</div>
+   <div id="ppAmount" class="portfolioStandard">Shares</div>
+   <div id="ppPurchasePrice" class="portfolioStandard">Average Price</div>
+ </div>
+ <div id="portProduct1">
+   <div id="pp1Code" class="portfolioStandard"></div>
+   <div id="pp1Amount" class="portfolioStandard"></div>
+   <div id="pp1PurchasePrice" class="portfolioStandard"></div>
+ </div>
+ <div id="portProduct2">
+   <div id="pp2Code" class="portfolioStandard"></div>
+   <div id="pp2Amount" class="portfolioStandard"></div>
+   <div id="pp2PurchasePrice" class="portfolioStandard"></div>
+ </div>
+ <div id="portProduct3">
+   <div id="pp3Code" class="portfolioStandard"></div>
+   <div id="pp3Amount" class="portfolioStandard"></div>
+   <div id="pp3PurchasePrice" class="portfolioStandard"></div>
+ </div>
+</div>
+
+<script type="text/javascript" src="js/default.js"></script>
+</body>
+</html>
