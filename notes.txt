@@ -122,3 +122,5 @@ mongoimport -d simDB -c clients --type csv --file clients.csv --headerline
             article: 'Earlier today, at approx...'
            }]
 }
+
+

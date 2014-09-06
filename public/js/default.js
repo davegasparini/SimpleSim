@@ -9,6 +9,7 @@ $("#elapsedTime").hide();
 $("#adminButtons").hide();
 $("#news").hide();
 $("#marketPriceUpdates").hide();
+$("#portfolio").hide();
 
 function login() {
 	var username = $("#usernameInputText").val();
@@ -27,15 +28,15 @@ socket.on('updatedNews', function (data) {
 socket.on('updatedPortfolio', function (data) {
 	$("#pp1Code").text(data.portfolio[0].code);
 	$("#pp1Amount").text(data.portfolio[0].amount);
-	$("#pp1PurchasePrice").text('$' + Math.ceil((data.portfolio[0].purchasePrice) * 100) / 100);
+	$("#pp1AveragePrice").text('$' + Math.ceil((data.portfolio[0].averagePrice) * 100) / 100);
 
 	$("#pp2Code").text(data.portfolio[1].code);
 	$("#pp2Amount").text(data.portfolio[1].amount);
-	$("#pp2PurchasePrice").text('$' + Math.ceil((data.portfolio[1].purchasePrice) * 100) / 100);
+	$("#pp2AveragePrice").text('$' + Math.ceil((data.portfolio[1].averagePrice) * 100) / 100);
 
 	$("#pp3Code").text(data.portfolio[2].code);
 	$("#pp3Amount").text(data.portfolio[2].amount);
-	$("#pp3PurchasePrice").text('$' + Math.ceil((data.portfolio[2].purchasePrice) * 100) / 100);
+	$("#pp3AveragePrice").text('$' + Math.ceil((data.portfolio[2].averagePrice) * 100) / 100);
 });
 
 socket.on('updatedTimer', function (data) {
@@ -61,6 +62,7 @@ socket.on('loginConfirmation', function (data) {
 	$("#login").hide();
 	$("#news").show();
 	$("#marketPriceUpdates").show();
+	$("#portfolio").show();
 	if(user == "1") {
 		$("#adminButtons").show();
 	};
@@ -86,8 +88,16 @@ function resetTime() {
 	socket.emit('resetTime', {} );
 };
 
-function purchase(productName) {
+function purchase(productName, amount) {
+
+	//GOOG only
+	//var newAmount = +($("#pp1Amount").text());
+	//$("#pp1Amount").text(newAmount + amount);
+	//var newAvgPrice = 
+
 	socket.emit('purchase', {username: user,
 							 productName: productName,
-							 buyPrice: p1Price});
+							 buyPrice: p1Price
+							});
+
 };

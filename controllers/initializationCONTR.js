@@ -73,8 +73,9 @@ module.exports.initialize = function(io, socket) {
             });
             // display any active data.
             broadcastConnectedUsers();
+            broadcastPortfolio(confirmedUsername, socket.id);
             if(elapsedTime>0){
-              retrieveMarketUpdate(latestMarketUpdate, socket.id);
+              broadcastLastMarketUpdate(latestMarketUpdate, socket.id);
             };
 
             // if user is admin, setup additional listeners for timer control.
@@ -88,18 +89,19 @@ module.exports.initialize = function(io, socket) {
 
   // manage product purchases.
   socket.on('purchase', function(data) {
-
-    console.log(data.username + " submitted a buy order for " + data.productName + " at " + data.buyPrice);
-
     if(data.productName == "GOOG") {
       Users.findOne( {username: data.username}, function (err, user) {
         var currentAmount = user.portfolio[0].amount;
-        var currentAvgPrice = user.portfolio[0].purchasePrice;
-        // rename purchasePrice to avgPrice in DB. Then implement trade history.
-        //console.log(": " + (currentAmount*currentAvgPrice)+data.buyPrice);
-        user.portfolio[0].purchasePrice = ( ((currentAmount*currentAvgPrice)+data.buyPrice) / (currentAmount+1) );
+        var currentAvgPrice = user.portfolio[0].averagePrice;
+        // ... implement trade history ...
+        user.portfolio[0].averagePrice = ( ((currentAmount*currentAvgPrice)+data.buyPrice) / (currentAmount+1) );
         user.portfolio[0].amount++;
-        user.save();
+        user.save(function(err, doc, numAffected) {
+          if(err) console.log(err);
+          else {
+            broadcastPortfolio(data.username, socket.id);
+          }
+        });
       });
     };
   });
@@ -158,9 +160,9 @@ module.exports.initialize = function(io, socket) {
               broadcastTimer(timeRemaining, elapsedTime);
             });
             // update all users' portfolio.
-            for (var i = 0; i < connectedUsers.length; i++) {
-              broadcastPortfolio(connectedUsers[i].username, connectedUsers[i].userSocketID);
-            };
+           // for (var i = 0; i < connectedUsers.length; i++) {
+             // broadcastPortfolio(connectedUsers[i].username, connectedUsers[i].userSocketID);
+           // };
           };
         },
         updateTimerFrequency
@@ -252,17 +254,17 @@ module.exports.initialize = function(io, socket) {
       marketData: marketData
     });
   };
+  function broadcastLastMarketUpdate(latestMarketData, socketID) {
+    io.sockets.connected[socketID].emit('updatedMarketData', {
+      marketData: latestMarketData
+    });
+  };
   function broadcastPortfolio(username, socketID) {
     Users.findOne({username: username}, 'portfolio', function(err, user) {
                 io.sockets.connected[socketID].emit('updatedPortfolio', {
                                                               portfolio: user.portfolio
                                                               });
               });
-  };
-  function retrieveMarketUpdate(latestMarketData, socketID) {
-    io.sockets.connected[socketID].emit('updatedMarketData', {
-      marketData: latestMarketData
-    });
   };
 
 }

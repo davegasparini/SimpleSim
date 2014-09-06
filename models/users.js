@@ -8,11 +8,15 @@ var UsersSchema = new mongoose.Schema({
   						{ 
   							code: String, 
   			  	  	amount: Number,
-  			  			purchasePrice: Number,
+  			  			averagePrice: Number,
   			  			timeOfPurchase: Number,
   			  			expiryDate: Number
 							}
-  					 ]
+  					 ],
+  cashbook: {
+    realizedProfit: Number,
+    unrealizedProfit: Number  
+  }
 });
 
 UsersSchema.methods.findNonAdminUsers = function (cb) {
