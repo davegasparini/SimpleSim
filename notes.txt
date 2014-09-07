@@ -65,7 +65,13 @@ emit -> 'buy event' -> send variables for:
 	- users.team, teams.teamMembers
 
 
+// build notes for linux
 
+- remove SimpleSim
+- git clone https://github.com/davegasparini/SimpleSim
+- rm -rf node_modules
+- npm install
+- update public/js/default.js socket to sim server IP
 
 
 

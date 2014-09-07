@@ -1,4 +1,4 @@
-var socket = io.connect('http://54.221.83.162');
+var socket = io.connect('http://localhost');
 var user;
 var p1Price;
 var p2Price;

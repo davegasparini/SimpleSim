@@ -1,5 +1,5 @@
-var Users = require('../models/Users').Users;
-var EventScript = require('../models/EventScript').EventScript;
+var Users = require('../models/users.js').Users;
+var EventScript = require('../models/eventScript.js').EventScript;
 
 var NOT_STARTED = 0;
 var LIVE = 1;
