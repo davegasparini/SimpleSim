@@ -7,6 +7,7 @@ var io = require('socket.io').listen(server);
 var initializationCONTR = require('./controllers/initializationCONTR');
 var mongoose = require('mongoose');
 
+console.log("start");
 
 // establish db connection
 mongoose.connect('mongodb://localhost/simDB');
