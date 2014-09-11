@@ -14,6 +14,7 @@ var UsersSchema = new mongoose.Schema({
 							}
   					 ],
   cashbook: {
+    accountTotal: Number,
     realizedProfit: Number,
     unrealizedProfit: Number  
   }

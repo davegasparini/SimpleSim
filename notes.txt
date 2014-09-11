@@ -66,13 +66,15 @@ emit -> 'buy event' -> send variables for:
 
 
 // build notes for linux
-
-- remove SimpleSim
+- remove SimpleSim from /var/www/
 - git clone https://github.com/davegasparini/SimpleSim
 - rm -rf node_modules
+- npm cache clean
 - npm install
 - update public/js/default.js socket to sim server IP
+- nodejs app.js
 
+// build notes for simDB transfer to linux
 
 
 
