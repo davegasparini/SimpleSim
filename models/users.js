@@ -8,15 +8,11 @@ var UsersSchema = new mongoose.Schema({
   						{ 
   							code: String, 
   			  	  	amount: Number,
-  			  			averagePrice: Number,
-  			  			timeOfPurchase: Number,
-  			  			expiryDate: Number
+  			  			averagePrice: Number
 							}
   					 ],
   cashbook: {
-    accountTotal: Number,
-    realizedProfit: Number,
-    unrealizedProfit: Number  
+    accountTotal: Number  
   }
 });
 

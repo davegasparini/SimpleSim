@@ -14,40 +14,53 @@ body {
 #loginStatus {
 	float: left;
 	width:204px;
-	height:20px;
+	height:60px;
 }
 #connectedUsers {
 	float: left;
 	width:300px;
-	height:20px;
+	height:60px;
 }
 #login {
 	float:left;
-	width:200px;
+	width:204px;
+}
+#timerInfo {
+	float: left;
+	width:564px;
+
+}
+#newsHeadline {
+	margin-bottom: 20px;
 }
 #eventScriptDisplay {
 	float:left;
-	width:200px;
+	width:204px;
+	height:60px;
 	margin:10px;
     padding: 3px;
     font-size: 90%;
+    border-style: solid;
+    border-width: 1px;
 }
 #news {
 	float:left;
 	width:300px;
-	min-height:59px;
+	height:135px;
 	margin:10px;
     padding: 3px;
     font-size: 90%;
+    border-style: solid;
+    border-width: 1px;
 }
 #adminButtons {
+	height:60px;
 	float:left;
-	width:532px;
-	height:25px;
+	width:300px;
 }
 #marketPriceUpdates {
+	width:204px;
 	float:left;
-	width:532px;
 }
 #marketProducts {
 	float: left;
@@ -59,7 +72,7 @@ body {
 }
 #cashbook {
 	float:left;
-	width:200px;
+	width:204px;
 	height:150px;
 	border-style: solid;
     border-width: 1px;
@@ -73,7 +86,6 @@ body {
     border-width: 1px;
 }
 
-
 .marketProduct {
 	width:100px;
 	height:20px;
@@ -84,11 +96,11 @@ body {
 }
 #buyOptions {
 	float: left;
-	width:135px;
     text-align: center;
 }
 .buyBtn {
 	margin:13px;
+	margin-right:23px;
 }
 .product {
 	width:100px;
@@ -110,7 +122,7 @@ body {
 	float:left;
 	margin:10px;
 	padding:3px;
-	width:304px;
+	width:300px;
 	height:150px;
 	border-style: solid;
     border-width: 1px;
@@ -128,7 +140,7 @@ body {
 	float:left;
 	height: 15px;
 	padding: 5px;
-	width: 79px;
+	width: 78px;
 	margin: 5px;
 	border-style: solid;
     border-width: 1px;
@@ -145,7 +157,11 @@ body {
 #pp1AveragePrice {
 }
 
-#accountTotal {
+#uninvestedFunds {
+	margin-bottom: 20px;
+}
+
+#investedFunds {
 	margin-top:5px;
 	margin-bottom: 20px;
 }

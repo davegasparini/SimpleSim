@@ -65,16 +65,34 @@ emit -> 'buy event' -> send variables for:
 	- users.team, teams.teamMembers
 
 
+
+
 // build notes for linux
 - remove SimpleSim from /var/www/
 - git clone https://github.com/davegasparini/SimpleSim
-- rm -rf node_modules
-- npm cache clean
-- npm install
-- update public/js/default.js socket to sim server IP
+- rm -rf SimpleSim/node_modules
+- SimpleSim/ npm cache clean
+- SimpleSim/ npm install
+- update SimpleSim/public/js/default.js socket to sim server IP
 - nodejs app.js
 
+
 // build notes for simDB transfer to linux
+
+- save copy of DB from mongo directory: mongodump -> github/dump
+
+- rm -rf /var/www/RestoreDB/dump
+- /var/www/RestoreDB/  git clone https://github.com/davegasparini/dump
+
+(mongo)
+- use simDB
+- db.users.drop()
+- db.eventScript.drop()
+
+- /var/www/RestoreDB/dump/simDB# mongorestore --collection users --db simDB users.bson
+- /var/www/RestoreDB/dump/simDB# mongorestore --collection eventScript --db simDB eventScript.bson
+
+
 
 
 

@@ -8,18 +8,12 @@ var realizedProfits;
 var unrealizedProfits;
 var gameState;
 
-var NOT_STARTED = 0;
-var LIVE = 1;
-var PAUSED = 2;
-var FINISHED = 3;
-
 $("#timer").hide();
 $("#elapsedTime").hide();
 $("#adminButtons").hide();
 $("#news").hide();
 $("#marketPriceUpdates").hide();
 $("#portfolio").hide();
-
 
 socket.on('updatedNews', function (data) {
 	$("#newsHeadline").text('Headline :  ' + data.newsHeadline);
@@ -43,10 +37,14 @@ socket.on('updatedPortfolio', function (data) {
 			unrealizedProfits += productProfit;
 		}
     };
-    $("#accountTotal").text(' -- Remaining Uninvested Funds -- ' + 
-    	'$' + uninvestedFunds.toFixed(2) + ' out of ' + '$' + defaultFunds);  
+
+    $("#investedFunds").text(' ------- Total Funds Invested ------- ' + 
+    	'$' + (defaultFunds-uninvestedFunds).toFixed(2) + ' out of ' + '$' + defaultFunds.toFixed(2));
+
+    $("#uninvestedFunds").text(' -- Remaining Uninvested Funds -- ' + '$' + uninvestedFunds.toFixed(2));
+
     if (currentMarketData !== undefined) {
-		$("#unrealizedProfits").text(' --------- Unrealized Profits --------- ' + '$' + unrealizedProfits.toFixed(2));
+		$("#unrealizedProfits").text(' ------ Total Unrealized Profits ------ ' + '$' + unrealizedProfits.toFixed(2));
 	}
 });
 
@@ -64,13 +62,12 @@ socket.on('updatedMarketData', function (data) {
 								(currentPortfolio[i].amount * Math.abs(currentPortfolio[i].averagePrice));
 			unrealizedProfits += productProfit;
 		}
-		$("#unrealizedProfits").text(' --------- Unrealized Profits --------- ' + '$' + unrealizedProfits.toFixed(2));
+		$("#unrealizedProfits").text(' ------ Total Unrealized Profits ------ ' + '$' + unrealizedProfits.toFixed(2));
 	}
 	for (var i = 0; i < currentMarketData.length; i++) {
 		$("#product"+(i+1)).text(currentMarketData[i].productCode + 
 				' : ' + currentMarketData[i].marketPrice.toFixed(2));
 	};
-
 });
 socket.on('loginConfirmation', function (data) {
 	user = data.username;
@@ -105,25 +102,35 @@ function startTime() {
 	socket.emit('startTime', {} );
 };
 function pauseTime() {
-	socket.emit('pauseTime', {} );
+	if (gameState != "Hasn't Started Yet") {
+		socket.emit('pauseTime', {} );
+	}
 };
 function resetTime() {
-	$("#unrealizedProfits").text("");
-	socket.emit('resetTime', {});
+	if (gameState != "Hasn't Started Yet") {
+		// clear any local instance data.
+		$("#unrealizedProfits").text("");
+		for (var i = 0; i < currentMarketData.length; i++) {
+			$("#product"+(i+1)).text("");
+		};
+		// reset the global instance data to scenario defaults on the server. 
+		socket.emit('resetTime', {});
+	}
 };
 function purchase(productCode, amount) {
-    for (var i = 0; i < currentMarketData.length; i++) {
-    	if(currentMarketData[i].productCode == productCode) {
-    		var newAvgPrice = [(currentPortfolio[i].amount * currentPortfolio[i].averagePrice) + 
-    			(amount * currentMarketData[i].marketPrice)] / (amount + currentPortfolio[i].amount);
+	if (gameState == "Started") {
+    	for (var i = 0; i < currentMarketData.length; i++) {
+    		if(currentMarketData[i].productCode == productCode) {
+    			var newAvgPrice = [(currentPortfolio[i].amount * currentPortfolio[i].averagePrice) + 
+    				(amount * currentMarketData[i].marketPrice)] / (amount + currentPortfolio[i].amount);
 
-    		socket.emit('purchase', {username: user,
-							 productCode: productCode,
-							 buyPrice: currentMarketData[i].marketPrice,
-							 newAmountPurchased: amount,
-							 newAvgPrice: newAvgPrice
-							});
-    	}
-    };
-
+    			socket.emit('purchase', {username: user,
+								 productCode: productCode,
+								buyPrice: currentMarketData[i].marketPrice,
+								 newAmountPurchased: amount,
+								 newAvgPrice: newAvgPrice
+								});
+    		}
+    	};
+    }
 };

@@ -220,9 +220,9 @@ module.exports.initialize = function(io, socket) {
         // clear news on client side.
         broadcastNews({headline: "", article: ""});
         // clear marketUpdate display data on client side.
-        broadcastNewMarketUpdate([{productCode: "", marketPrice: ""},
+        /*broadcastNewMarketUpdate([{productCode: "", marketPrice: ""},
                                   {productCode: "", marketPrice: ""},
-                                  {productCode: "", marketPrice: ""}]);
+                                  {productCode: "", marketPrice: ""}]);*/
       }
     });
   };
