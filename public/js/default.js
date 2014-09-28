@@ -1,8 +1,17 @@
 var socket = io.connect('http://localhost');
 var user;
-var p1Price;
-var p2Price;
-var p3Price;
+var currentMarketData;
+var currentPortfolio;
+var defaultFunds;
+var uninvestedFunds;
+var realizedProfits;
+var unrealizedProfits;
+var gameState;
+
+var NOT_STARTED = 0;
+var LIVE = 1;
+var PAUSED = 2;
+var FINISHED = 3;
 
 $("#timer").hide();
 $("#elapsedTime").hide();
@@ -17,38 +26,55 @@ socket.on('updatedNews', function (data) {
 	$("#newsArticle").text('Article :  ' + data.newsArticle);
 });
 socket.on('updatedPortfolio', function (data) {
-	$("#pp1Code").text(data.portfolio[0].code);
-	$("#pp1Amount").text(data.portfolio[0].amount);
-	$("#pp1AveragePrice").text('$' + Math.ceil((data.portfolio[0].averagePrice) * 100) / 100);
-
-	$("#pp2Code").text(data.portfolio[1].code);
-	$("#pp2Amount").text(data.portfolio[1].amount);
-	$("#pp2AveragePrice").text('$' + Math.ceil((data.portfolio[1].averagePrice) * 100) / 100);
-
-	$("#pp3Code").text(data.portfolio[2].code);
-	$("#pp3Amount").text(data.portfolio[2].amount);
-	$("#pp3AveragePrice").text('$' + Math.ceil((data.portfolio[2].averagePrice) * 100) / 100);
+	currentPortfolio = data.portfolio;
+	uninvestedFunds = defaultFunds;
+	unrealizedProfits = 0;
+	for (var i = 0; i < data.portfolio.length; i++) {
+		// Update Shares and Average Price.
+		$("#pp"+(i+1)+"Code").text(data.portfolio[i].code);
+		$("#pp"+(i+1)+"Amount").text(data.portfolio[i].amount);
+		$("#pp"+(i+1)+"AveragePrice").text('$' + currentPortfolio[i].averagePrice.toFixed(2));
+		// Update Uninvested Funds and Unrealized Profits
+		uninvestedFunds -= data.portfolio[i].amount * 
+			(Math.ceil((Math.abs(data.portfolio[i].averagePrice)) * 100) / 100);
+		if (currentMarketData !== undefined) {
+			var productProfit = (data.portfolio[i].amount * currentMarketData[i].marketPrice) -
+							(data.portfolio[i].amount * Math.abs(data.portfolio[i].averagePrice));
+			unrealizedProfits += productProfit;
+		}
+    };
+    $("#accountTotal").text(' -- Remaining Uninvested Funds -- ' + 
+    	'$' + uninvestedFunds.toFixed(2) + ' out of ' + '$' + defaultFunds);  
+    if (currentMarketData !== undefined) {
+		$("#unrealizedProfits").text(' --------- Unrealized Profits --------- ' + '$' + unrealizedProfits.toFixed(2));
+	}
 });
-socket.on('updatedCashbook', function (data) {
-	$("#accountTotal").text('Account Total: ' + '$' + Math.ceil((data.cashbook.accountTotal) * 100) / 100);
-	$("#realizedProfits").text('Realized Profit: ' + '$' + Math.ceil((data.cashbook.realizedProfit) * 100) / 100);
-	$("#unrealizedProfits").text('Unrealized Profit: ' + '$' + Math.ceil((data.cashbook.unrealizedProfit) * 100) / 100);
-});
+
 socket.on('updatedTimer', function (data) {
     $("#timer").text('Seconds To Play :  ' + data.time);   
     $("#elapsedTime").text('Elapsed Time (in seconds) :  ' + data.elapsedTime);
 });
 socket.on('updatedMarketData', function (data) {
-	p1Price = data.marketData[0].marketPrice;
-	p2Price = data.marketData[1].marketPrice;
-	p3Price = data.marketData[2].marketPrice;
+	currentMarketData = data.marketData;
 
-	$("#product1").text('GOOG: ' + p1Price);
-	$("#product2").text('MSFT: ' + p2Price);
-	$("#product3").text('CAT: '  + p3Price);
+	if (gameState !== 'Paused') {
+		unrealizedProfits = 0;
+		for (var i = 0; i < currentPortfolio.length; i++) {
+			var productProfit = (currentPortfolio[i].amount * currentMarketData[i].marketPrice) -
+								(currentPortfolio[i].amount * Math.abs(currentPortfolio[i].averagePrice));
+			unrealizedProfits += productProfit;
+		}
+		$("#unrealizedProfits").text(' --------- Unrealized Profits --------- ' + '$' + unrealizedProfits.toFixed(2));
+	}
+	for (var i = 0; i < currentMarketData.length; i++) {
+		$("#product"+(i+1)).text(currentMarketData[i].productCode + 
+				' : ' + currentMarketData[i].marketPrice.toFixed(2));
+	};
+
 });
 socket.on('loginConfirmation', function (data) {
 	user = data.username;
+	defaultFunds = data.defaultFunds;
 	$("#userNameDisplayText").text("login status: logged in as: " + user);
 	$("#timer").show();
 	$("#elapsedTime").show();
@@ -61,17 +87,18 @@ socket.on('loginConfirmation', function (data) {
 	};
 });
 socket.on('updatedGameState', function (data) {
-	$("#gameState").text('Status :  ' + data.gameState);
+	gameState = data.gameState;
+	$("#gameState").text('GameState :  ' + gameState);
 });
 socket.on('updatedConnectedUsers', function (data) {
+	// display updated user pool.
 	$("#connectedUsers").text('online :  ' + data.connectedUsers);
 });
 function login() {
 	var username = $("#usernameInputText").val();
 	var password = $("#passwordInputText").val();
-
 	socket.emit('login', { username: username,
-						   password: password
+						   password: password,
 						 });
 };
 function startTime() {
@@ -81,11 +108,22 @@ function pauseTime() {
 	socket.emit('pauseTime', {} );
 };
 function resetTime() {
-	socket.emit('resetTime', {} );
+	$("#unrealizedProfits").text("");
+	socket.emit('resetTime', {});
 };
-function purchase(productName, amount) {
-	socket.emit('purchase', {username: user,
-							 productName: productName,
-							 buyPrice: p1Price
+function purchase(productCode, amount) {
+    for (var i = 0; i < currentMarketData.length; i++) {
+    	if(currentMarketData[i].productCode == productCode) {
+    		var newAvgPrice = [(currentPortfolio[i].amount * currentPortfolio[i].averagePrice) + 
+    			(amount * currentMarketData[i].marketPrice)] / (amount + currentPortfolio[i].amount);
+
+    		socket.emit('purchase', {username: user,
+							 productCode: productCode,
+							 buyPrice: currentMarketData[i].marketPrice,
+							 newAmountPurchased: amount,
+							 newAvgPrice: newAvgPrice
 							});
+    	}
+    };
+
 };

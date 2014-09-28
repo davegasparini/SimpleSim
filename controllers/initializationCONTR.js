@@ -1,15 +1,19 @@
+// database objects
 var Users = require('../models/users.js').Users;
 var EventScript = require('../models/eventScript.js').EventScript;
 
+// static gamestate variables
 var NOT_STARTED = 0;
 var LIVE = 1;
 var PAUSED = 2;
 var FINISHED = 3;
 var ADMIN = 1;
 
+// dynamic gameplay variables
 var updateTimerFrequency = 150;
 var gameState = NOT_STARTED;
-var scriptRuntime = 460;
+var scriptRuntime = 460; // move to scenario default in db.
+var timeRemaining = scriptRuntime; // move assignment to scenario default 
 var currentEventScript = 0;
 var currentTime = 0;
 var previousTime = 0;
@@ -18,23 +22,28 @@ var elapsedTimeInSeconds = 0;
 var connectedUsers = [];
 var htmlUserList;
 var latestMarketUpdate;
-// store news array
+var currentNews;
+var initialized = false;
 
 
-// The initialization controller sets up the user connection, 
-// authentication, disconnection, and gamestate/timer.
+// scenario defaults
+var defaultFunds;
+
 module.exports.initialize = function(io, socket) {
 
 
-  /* testing
-
+  /* test functions
   var nonAdmin = new Users();
   nonAdmin.findNonAdminUsers(function(err, users) {
     //console.log(users);
     //console.log( getGameStateString(gameState) );
   }); */
 
-
+  if (!initialized) {
+    // load scenario defaults
+    loadScenarioDefaults();
+    initialized = true;
+  };
 
   // set default live broadcasts, even without the user logged in.
   broadcastConnectedUsers();
@@ -60,23 +69,25 @@ module.exports.initialize = function(io, socket) {
             // save the username and socket information.
             connectedUsers.push({
               username: confirmedUsername,
-              socketID: socket.id,
+              userSocketID: socket.id,
               userAccess: userAccessLevel
                 // new elements for tracking and performance
                 // userLoginTimeStamp
                 // userLogoutTimeStamp
                 // userLoginStatus
             });
-            // send username back as login confirmation.
+            // send username & global instance variables back as login confirmation.
             socket.emit('loginConfirmation', {
-              username: confirmedUsername
+              username: confirmedUsername,
+              defaultFunds: defaultFunds
             });
             // display any active data.
             broadcastConnectedUsers();
             broadcastPortfolio(confirmedUsername, socket.id);
-            broadcastCashbook(confirmedUsername, socket.id);
             if(elapsedTime>0){
               broadcastCurrentMarketUpdate(latestMarketUpdate, socket.id);
+              rebroadcastNews(socket.id);
+              rebroadcastTimer(socket.id);
             };
 
             // if user is admin, setup additional listeners for timer control.
@@ -90,25 +101,23 @@ module.exports.initialize = function(io, socket) {
 
   // manage product purchases.
   socket.on('purchase', function(data) {
-    if(data.productName == "GOOG") {
+    if(data.productCode == "GOOG") {
       Users.findOne( {username: data.username}, function (err, user) {
-        var currentAmount = user.portfolio[0].amount;
-        var currentAvgPrice = user.portfolio[0].averagePrice;
         var currentBuyPrice = data.buyPrice;
         var currentAccountTotal = user.cashbook.accountTotal;
         // check if user has enough funds to buy product.
         if ( (currentAccountTotal-currentBuyPrice) > 0 ) {
           // ... implement trade history ...
-          user.cashbook.accountTotal -= currentBuyPrice;
-          //user.cashbook.unrealizedProfit = (currentBuyPrice*currentAmount)-(currentAvgPrice*currentAmount); 
-          user.cashbook.unrealizedProfit = (currentBuyPrice-currentAvgPrice)*currentAmount;
-          user.portfolio[0].averagePrice = ( ((currentAmount*currentAvgPrice)+currentBuyPrice) / (currentAmount+1) );
-          user.portfolio[0].amount++;
+
+          // replace with findOneAndUpdate ...
+
+          user.portfolio[0].averagePrice = data.newAvgPrice;
+          user.portfolio[0].amount += data.newAmountPurchased;
+
           user.save(function(err, doc, numAffected) {
             if(err) console.log(err);
             else {
               broadcastPortfolio(data.username, socket.id);
-              broadcastCashbook(data.username, socket.id);
             }
           });
         }
@@ -150,10 +159,9 @@ module.exports.initialize = function(io, socket) {
           if (elapsedTimeInSeconds > scriptRuntime) {
             clearInterval(UpdateData);
           };
-          var timeRemaining = scriptRuntime - elapsedTimeInSeconds;
+          timeRemaining = scriptRuntime - elapsedTimeInSeconds;
           // If 1 full step has passed, check for new events.
           if(oneSecondHasPassed) {
-            EventScript.find(function(err, eventScript) {
               EventScript.findCurrentScript(elapsedTimeInSeconds, function(err, script) {
                 // if there's a script present at this time, check specifically for news and market updates.
                 if(script[0] !== undefined) {
@@ -163,19 +171,16 @@ module.exports.initialize = function(io, socket) {
                       latestMarketUpdate = script[0].marketUpdate;
                       broadcastNewMarketUpdate(latestMarketUpdate);
 
-                      // update all users' cashbook. ...
-                      broadcastCashbookToAll();
-
                     }
                     else if (events[i] == "News") {
-                      broadcastNews(script[0].news[0]);
+                      currentNews = script[0].news[0];
+                      broadcastNews(currentNews);
                     };
                   };
                 };
               });
-            });
             // update all users' timers.
-            broadcastTimer(timeRemaining, elapsedTime);
+            broadcastTimer();
           };
         },
         updateTimerFrequency
@@ -189,10 +194,10 @@ module.exports.initialize = function(io, socket) {
       gameState = PAUSED;
       broadcastGameState();
       clearInterval(UpdateData);
-      var timeRemaining = scriptRuntime - elapsedTimeInSeconds;
+      timeRemaining = scriptRuntime - elapsedTimeInSeconds;
       // Emit updated timer information to all users after pausing.
       EventScript.find(function(err, eventScript) {
-       broadcastTimer(timeRemaining, elapsedTime);
+       broadcastTimer();
       });
     });
 
@@ -207,10 +212,10 @@ module.exports.initialize = function(io, socket) {
         elapsedTime = 0;
         elapsedTimeInSeconds = 0;
         currentEventScript = 0;
-        var timeRemaining = scriptRuntime - elapsedTimeInSeconds;
+        timeRemaining = scriptRuntime - elapsedTimeInSeconds;
         // clear timer on client side
         EventScript.find(function(err, eventScript) {
-          broadcastTimer(timeRemaining, elapsedTime);
+          broadcastTimer();
         });
         // clear news on client side.
         broadcastNews({headline: "", article: ""});
@@ -243,8 +248,14 @@ module.exports.initialize = function(io, socket) {
     var updatedGameState = getGameStateString(gameState);
     io.sockets.emit('updatedGameState', {gameState: updatedGameState} );
   };
-  function broadcastTimer(timeRemaining, elapsedTime) {
+  function broadcastTimer() {
     io.sockets.emit('updatedTimer', {
+      time: timeRemaining,
+      elapsedTime: elapsedTimeInSeconds
+    });
+  };
+  function rebroadcastTimer(socketID) {
+    io.sockets.connected[socketID].emit('updatedTimer', {
       time: timeRemaining,
       elapsedTime: elapsedTimeInSeconds
     });
@@ -264,6 +275,12 @@ module.exports.initialize = function(io, socket) {
       newsArticle: newsScript.article
     });
   };
+  function rebroadcastNews(socketID) {
+    io.sockets.connected[socketID].emit('updatedNews', {
+                                                         newsHeadline: currentNews.headline,
+                                                         newsArticle: currentNews.article
+                                                      });
+  };
   function broadcastNewMarketUpdate(marketData) {
     io.sockets.emit('updatedMarketData', {
       marketData: marketData
@@ -281,26 +298,11 @@ module.exports.initialize = function(io, socket) {
                                                               });
               });
   };
-  function broadcastCashbook(username, socketID) {
-    Users.findOne({username: username}, 'cashbook', function(err, user) {
-                io.sockets.connected[socketID].emit('updatedCashbook', {
-                                                              cashbook: user.cashbook
-                                                              });
-              });
-  };
-  function broadcastCashbookToAll() {
-    connectedUsers.forEach(function(connectedUser) {
-      Users.findOne({username: connectedUser.username}, 'cashbook, portfolio', function(err, user) {
-        var currentAmount = user.portfolio[0].amount;
-        var currentAvgPrice = user.portfolio[0].averagePrice;
-        var currentBuyPrice = latestMarketUpdate[0].marketPrice;
-        user.cashbook.unrealizedProfit = (currentBuyPrice-currentAvgPrice)*currentAmount;
-        console.log("unr: " + user.cashbook.unrealizedProfit);
-        io.sockets.connected[connectedUser.socketID].emit('updatedCashbook', {
-                                                              cashbook: user.cashbook
-                                                              });
-      });
+  function loadScenarioDefaults() {
+    EventScript.find( {toc:0}, function(err, eventScript) {
+      defaultFunds = eventScript[0].startingFunds;
+      console.log("loading default scenario variables:\nstartingFunds: " + defaultFunds);
     });
   };
-
+  
 }

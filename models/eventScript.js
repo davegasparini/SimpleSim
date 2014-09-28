@@ -10,8 +10,8 @@ var eventScriptSchema = new mongoose.Schema({
   marketUpdate: [{
   					productCode: String,
   					marketPrice: Number
-  				 }]
-
+  				 }],
+  startingFunds: Number
 });
 
 eventScriptSchema.statics.findCurrentScript = function (time, cb) {
