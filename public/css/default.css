@@ -11,6 +11,12 @@ body {
     display: inline-block; /* Necessary to trigger "hasLayout" in IE */
     display: block; /* Sets element back to block */
 }
+#usernameInputText {
+	width:199px;
+}
+#passwordInputText {
+	width:199px;
+}
 #loginStatus {
 	float: left;
 	width:204px;
@@ -99,8 +105,8 @@ body {
     text-align: center;
 }
 .buyBtn {
-	margin:13px;
-	margin-right:23px;
+	float: right;
+	margin-top:10px;
 }
 .product {
 	width:100px;

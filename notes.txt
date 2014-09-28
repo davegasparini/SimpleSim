@@ -78,17 +78,13 @@ emit -> 'buy event' -> send variables for:
 
 
 // build notes for simDB transfer to linux
-
 - save copy of DB from mongo directory: mongodump -> github/dump
-
 - rm -rf /var/www/RestoreDB/dump
 - /var/www/RestoreDB/  git clone https://github.com/davegasparini/dump
-
-(mongo)
+// access mongo
 - use simDB
 - db.users.drop()
 - db.eventScript.drop()
-
 - /var/www/RestoreDB/dump/simDB# mongorestore --collection users --db simDB users.bson
 - /var/www/RestoreDB/dump/simDB# mongorestore --collection eventScript --db simDB eventScript.bson
 
