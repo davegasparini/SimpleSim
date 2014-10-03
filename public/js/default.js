@@ -108,12 +108,12 @@ function pauseTime() {
 };
 function resetTime() {
 	if (gameState != "Hasn't Started Yet") {
-		// clear any local instance data.
+		// clear local instance data.
 		$("#unrealizedProfits").text("");
 		for (var i = 0; i < currentMarketData.length; i++) {
 			$("#product"+(i+1)).text("");
 		};
-		// reset the global instance data to scenario defaults on the server. 
+		// reset the global scenario defaults on server. 
 		socket.emit('resetTime', {});
 	}
 };

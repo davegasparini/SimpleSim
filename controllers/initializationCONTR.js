@@ -145,6 +145,9 @@ module.exports.initialize = function(io, socket) {
   function initializeAdminListeners() {
     // start a listener on the server for 'startTime' when admin clicks start button.
     socket.on('startTime', function(data) {
+      
+      // disable reset ...............
+
       currentTime = previousTime = Date.now();
       // initialize primary timer to broadcast game updates.
       UpdateData = setInterval(function() {
@@ -187,6 +190,7 @@ module.exports.initialize = function(io, socket) {
       );
       gameState = LIVE;
       broadcastGameState();
+      // enable reset ...............
     });
 
     // start a listener on the server for 'pauseTime' when admin clicks pause button.
@@ -203,7 +207,7 @@ module.exports.initialize = function(io, socket) {
 
     // start a listener on the server for 'resetTime' when admin clicks 'reset' button.
     socket.on('resetTime', function(data) {
-      if (typeof UpdateData !== 'undefined') {
+      if (typeof UpdateData !== 'undefined') { // and reset is enabled.........
         clearInterval(UpdateData);
         gameState = PAUSED;
         broadcastGameState();
