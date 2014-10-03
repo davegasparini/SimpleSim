@@ -21,7 +21,7 @@ var elapsedTime = 0;
 var elapsedTimeInSeconds = 0;
 var connectedUsers = [];
 var htmlUserList;
-var latestMarketUpdate;
+var latestMarketUpdate = [];
 var currentNews;
 var initialized = false;
 
@@ -84,7 +84,7 @@ module.exports.initialize = function(io, socket) {
             // display any active data.
             broadcastConnectedUsers();
             broadcastPortfolio(confirmedUsername, socket.id);
-            if(elapsedTime>0){
+            if(elapsedTime>0){ // GAMESTATE instead??  .....................
               broadcastCurrentMarketUpdate(latestMarketUpdate, socket.id);
               rebroadcastNews(socket.id);
               rebroadcastTimer(socket.id);
@@ -145,7 +145,7 @@ module.exports.initialize = function(io, socket) {
   function initializeAdminListeners() {
     // start a listener on the server for 'startTime' when admin clicks start button.
     socket.on('startTime', function(data) {
-      
+
       // disable reset ...............
 
       currentTime = previousTime = Date.now();

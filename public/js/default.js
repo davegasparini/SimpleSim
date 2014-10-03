@@ -109,9 +109,9 @@ function pauseTime() {
 function resetTime() {
 	if (gameState != "Hasn't Started Yet") {
 		// clear local instance data.
-		$("#unrealizedProfits").text("");
+		$("#unrealizedProfits").text(""); // ONLY HAPPENS ON ADMIN CLIENT
 		for (var i = 0; i < currentMarketData.length; i++) {
-			$("#product"+(i+1)).text("");
+			$("#product"+(i+1)).text(""); // ONLY HAPPENS ON ADMIN CLIENT
 		};
 		// reset the global scenario defaults on server. 
 		socket.emit('resetTime', {});
