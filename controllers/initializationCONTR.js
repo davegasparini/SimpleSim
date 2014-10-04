@@ -84,7 +84,7 @@ module.exports.initialize = function(io, socket) {
             // display any active data.
             broadcastConnectedUsers();
             broadcastPortfolio(confirmedUsername, socket.id);
-            if(elapsedTime>0){ // GAMESTATE instead??  .....................
+            if(elapsedTime>0){ // relient on marketData Update being present at 1s.
               broadcastCurrentMarketUpdate(latestMarketUpdate, socket.id);
               rebroadcastNews(socket.id);
               rebroadcastTimer(socket.id);
@@ -146,51 +146,50 @@ module.exports.initialize = function(io, socket) {
     // start a listener on the server for 'startTime' when admin clicks start button.
     socket.on('startTime', function(data) {
 
-      // disable reset ...............
+      if (gameState != LIVE) {
+        gameState = LIVE;
+        broadcastGameState();
 
-      currentTime = previousTime = Date.now();
-      // initialize primary timer to broadcast game updates.
-      UpdateData = setInterval(function() {
-          // update timer calculation variables.
-          previousTime = currentTime;
-          currentTime = Date.now();
-          elapsedTime += currentTime - previousTime;
-          prevElapsedTimeInSeconds = elapsedTimeInSeconds;
-          elapsedTimeInSeconds = Math.round(elapsedTime / 1000);
-          var oneSecondHasPassed = elapsedTimeInSeconds - prevElapsedTimeInSeconds;
-          // finish if we've reached the end of the scripted data.
-          if (elapsedTimeInSeconds > scriptRuntime) {
-            clearInterval(UpdateData);
-          };
-          timeRemaining = scriptRuntime - elapsedTimeInSeconds;
-          // If 1 full step has passed, check for new events.
-          if(oneSecondHasPassed) {
-              EventScript.findCurrentScript(elapsedTimeInSeconds, function(err, script) {
-                // if there's a script present at this time, check specifically for news and market updates.
-                if(script[0] !== undefined) {
-                  var events = script[0].eventType;
-                  for (var i = events.length - 1; i >= 0; i--) {
-                    if(events[i] == "MarketUpdate") {
-                      latestMarketUpdate = script[0].marketUpdate;
-                      broadcastNewMarketUpdate(latestMarketUpdate);
-
-                    }
-                    else if (events[i] == "News") {
-                      currentNews = script[0].news[0];
-                      broadcastNews(currentNews);
-                    };
-                  };
-                };
-              });
-            // update all users' timers.
-            broadcastTimer();
-          };
-        },
-        updateTimerFrequency
-      );
-      gameState = LIVE;
-      broadcastGameState();
-      // enable reset ...............
+        currentTime = previousTime = Date.now();
+        // initialize primary timer to broadcast game updates.
+        UpdateData = setInterval(function() {
+            // update timer calculation variables.
+            previousTime = currentTime;
+            currentTime = Date.now();
+            elapsedTime += currentTime - previousTime;
+            prevElapsedTimeInSeconds = elapsedTimeInSeconds;
+            elapsedTimeInSeconds = Math.round(elapsedTime / 1000);
+            var oneSecondHasPassed = elapsedTimeInSeconds - prevElapsedTimeInSeconds;
+            // finish if we've reached the end of the scripted data.
+            if (elapsedTimeInSeconds > scriptRuntime) {
+              clearInterval(UpdateData);
+            };
+            timeRemaining = scriptRuntime - elapsedTimeInSeconds;
+            // If 1 full step has passed, check for new events.
+            if(oneSecondHasPassed) {
+                EventScript.findCurrentScript(elapsedTimeInSeconds, function(err, script) {
+                  // if there's a script present at this time, check specifically for news and market updates.
+                  if(script[0] !== undefined) {
+                    var events = script[0].eventType;
+                   for (var i = events.length - 1; i >= 0; i--) {
+                     if(events[i] == "MarketUpdate") {
+                        latestMarketUpdate = script[0].marketUpdate;
+                        broadcastNewMarketUpdate(latestMarketUpdate);
+                     }
+                     else if (events[i] == "News") {
+                       currentNews = script[0].news[0];
+                       broadcastNews(currentNews);
+                     };
+                   };
+                 };
+                });
+              // update all users' timers.
+              broadcastTimer();
+            };
+          },
+          updateTimerFrequency
+        );
+      }
     });
 
     // start a listener on the server for 'pauseTime' when admin clicks pause button.
@@ -207,7 +206,7 @@ module.exports.initialize = function(io, socket) {
 
     // start a listener on the server for 'resetTime' when admin clicks 'reset' button.
     socket.on('resetTime', function(data) {
-      if (typeof UpdateData !== 'undefined') { // and reset is enabled.........
+      if (typeof UpdateData !== 'undefined') {
         clearInterval(UpdateData);
         gameState = PAUSED;
         broadcastGameState();
@@ -222,11 +221,9 @@ module.exports.initialize = function(io, socket) {
           broadcastTimer();
         });
         // clear news on client side.
-        broadcastNews({headline: "", article: ""});
+        broadcastNews({headline: "", article: ""}); // ........ broadcast Reset Confirm ........ absorb?
         // clear marketUpdate display data on client side.
-        /*broadcastNewMarketUpdate([{productCode: "", marketPrice: ""},
-                                  {productCode: "", marketPrice: ""},
-                                  {productCode: "", marketPrice: ""}]);*/
+        broadcastReset();
       }
     });
   };
@@ -307,6 +304,9 @@ module.exports.initialize = function(io, socket) {
       defaultFunds = eventScript[0].startingFunds;
       console.log("loading default scenario variables:\nstartingFunds: " + defaultFunds);
     });
+  };
+  function broadcastReset() {
+    io.sockets.emit('reset', {});
   };
   
 }

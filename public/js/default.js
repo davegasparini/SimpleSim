@@ -88,8 +88,15 @@ socket.on('updatedGameState', function (data) {
 	$("#gameState").text('GameState :  ' + gameState);
 });
 socket.on('updatedConnectedUsers', function (data) {
-	// display updated user pool.
+	// display updated connected users pool.
 	$("#connectedUsers").text('online :  ' + data.connectedUsers);
+});
+socket.on('reset', function (data) {
+	// clear local instance data.
+	$("#unrealizedProfits").text("");
+	for (var i = 0; i < currentMarketData.length; i++) {
+		$("#product"+(i+1)).text("");
+	};
 });
 function login() {
 	var username = $("#usernameInputText").val();
@@ -102,18 +109,12 @@ function startTime() {
 	socket.emit('startTime', {} );
 };
 function pauseTime() {
-	if (gameState != "Hasn't Started Yet") {
+	if (gameState == "Started") {
 		socket.emit('pauseTime', {} );
 	}
 };
 function resetTime() {
-	if (gameState != "Hasn't Started Yet") {
-		// clear local instance data.
-		$("#unrealizedProfits").text(""); // ONLY HAPPENS ON ADMIN CLIENT
-		for (var i = 0; i < currentMarketData.length; i++) {
-			$("#product"+(i+1)).text(""); // ONLY HAPPENS ON ADMIN CLIENT
-		};
-		// reset the global scenario defaults on server. 
+	if (gameState != "Hasn't Started Yet") { 
 		socket.emit('resetTime', {});
 	}
 };
