@@ -4,12 +4,32 @@
   <meta charset="utf-8">
   <script src="/socket.io/socket.io.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
   <link rel="stylesheet" type="text/css" href="css/default.css" />
-  <title>woo!</title>
+  <title>SimpleSim Platform Demo</title>
 </head>
 <body>
+<div id="page">
 
-<div id="platform">
+<a href="http://www.fitchlearning.com/us/"><span id="headerImage"></span></a>
+
+<div id="nav">
+  <a href=""><span id="navAbout">About Fitch Learning</span></a>
+  <a href=""><span id="navSimDemo">Simulation Demo</span></a>
+</div>
+
+<div id="mainContentBG">
+   
+  <div id="mainContentHeader">
+    <div id="mainContentTitleBG">
+      <div id="mainContentTitle">SimpleSim Platform</div>
+      <div id="aboutIcon"></div>
+      <div id="mainContentSubTitle">Demo</div>
+    </div>
+  </div>
+
+ <div id="platform">
 
 <div id="loginStatus" class="standard">
   <div id="userNameDisplayText">login status: not logged in</div>
@@ -89,8 +109,12 @@
  </div>
 </div>
 
+ </div>
 </div>
 
-<script type="text/javascript" src="js/default.js"></script>
+    <script type="text/javascript" src="js/default.js"></script>
+
+    <div id="footer">Copyright &copy; 2014 by Fitch Learning Inc.</div>
+  </div>
 </body>
 </html>

@@ -55,7 +55,7 @@ socket.on('updatedTimer', function (data) {
 socket.on('updatedMarketData', function (data) {
 	currentMarketData = data.marketData;
 
-	if (gameState !== 'Paused') {
+	if ( (gameState !== 'Paused') && (currentPortfolio !== undefined) ) {
 		unrealizedProfits = 0;
 		for (var i = 0; i < currentPortfolio.length; i++) {
 			var productProfit = (currentPortfolio[i].amount * currentMarketData[i].marketPrice) -
@@ -65,6 +65,9 @@ socket.on('updatedMarketData', function (data) {
 		$("#unrealizedProfits").text(' ------ Total Unrealized Profits ------ ' + '$' + unrealizedProfits.toFixed(2));
 	}
 	for (var i = 0; i < currentMarketData.length; i++) {
+		// test line
+		$("#product"+(i+1)).show( "highlight" );
+
 		$("#product"+(i+1)).text(currentMarketData[i].productCode + 
 				' : ' + currentMarketData[i].marketPrice.toFixed(2));
 	};
