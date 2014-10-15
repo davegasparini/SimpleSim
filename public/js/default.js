@@ -55,6 +55,7 @@ socket.on('updatedTimer', function (data) {
 socket.on('updatedMarketData', function (data) {
 	currentMarketData = data.marketData;
 
+	// update unrealized profit data
 	if ( (gameState !== 'Paused') && (currentPortfolio !== undefined) ) {
 		unrealizedProfits = 0;
 		for (var i = 0; i < currentPortfolio.length; i++) {
@@ -64,12 +65,25 @@ socket.on('updatedMarketData', function (data) {
 		}
 		$("#unrealizedProfits").text(' ------ Total Unrealized Profits ------ ' + '$' + unrealizedProfits.toFixed(2));
 	}
+
+	// update market ticker display data
 	for (var i = 0; i < currentMarketData.length; i++) {
 		// test line
-		$("#product"+(i+1)).show( "highlight" );
+		if( $("#productMarketPrice"+(i+1)).text() != "") {
+			var test = parseFloat($("#productMarketPrice"+(i+1)).text) < currentMarketData[i].marketPrice.toFixed(2);
+			var currentNumb = parseFloat($("#productMarketPrice"+(i+1)).text());
+			var newNumb = currentMarketData[i].marketPrice.toFixed(2);
+			if( currentNumb < newNumb ) {
+				$("#product"+(i+1)).effect("highlight", {color:"#99FF99"}, 1000);
+			}
+			else {
+				$("#product"+(i+1)).effect("highlight", {color:"#FF9999"}, 1000);
+			}
+		}
 
-		$("#product"+(i+1)).text(currentMarketData[i].productCode + 
-				' : ' + currentMarketData[i].marketPrice.toFixed(2));
+
+		$("#productName"+(i+1)).text(currentMarketData[i].productCode);
+		$("#productMarketPrice"+(i+1)).text(currentMarketData[i].marketPrice.toFixed(2));
 	};
 });
 socket.on('loginConfirmation', function (data) {
@@ -98,7 +112,8 @@ socket.on('reset', function (data) {
 	// clear local instance data.
 	$("#unrealizedProfits").text("");
 	for (var i = 0; i < currentMarketData.length; i++) {
-		$("#product"+(i+1)).text("");
+		$("#productName"+(i+1)).text("");
+		$("#productMarketPrice"+(i+1)).text("");
 	};
 });
 function login() {

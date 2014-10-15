@@ -99,7 +99,7 @@ module.exports.initialize = function(io, socket) {
       });
   });
 
-  // manage product purchases.
+  // manage product purchases. // ...hard coded demo function. must be abstracted....
   socket.on('purchase', function(data) {
     if(data.productCode == "GOOG") {
       Users.findOne( {username: data.username}, function (err, user) {

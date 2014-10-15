@@ -74,6 +74,7 @@ body {
 #marketProducts {
 	float: left;
 	width:135px;
+	height: 136px;
 }
 #portfolio {
 	float:left;
@@ -94,7 +95,6 @@ body {
     border-bottom-style: solid;
     border-width: 1px;
 }
-
 .marketProduct {
 	width:100px;
 	height:20px;
@@ -135,6 +135,36 @@ body {
 	height:150px;
 	border-style: solid;
     border-width: 1px;
+}
+#productName1 {
+	margin-top: 3px;
+	height: 20px;
+	float: left;
+}
+#productName2 {
+	margin-top: 3px;
+	height: 20px;
+	float: left;
+}
+#productName3 {
+	margin-top: 3px;
+	height: 20px;
+	float: left;
+}
+#productMarketPrice1 {
+	margin-top: 3px;
+	height: 20px;
+	float: right;
+}
+#productMarketPrice2 {
+	margin-top: 3px;
+	height: 20px;
+	float: right;
+}
+#productMarketPrice3 {
+	margin-top: 3px;
+	height: 20px;
+	float: right;
 }
 #portProduct1 {
 	float: left;
